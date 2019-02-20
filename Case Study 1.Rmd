@@ -29,21 +29,21 @@ Breweries <- read_csv('Breweries.csv', col_types = cols())
 
 ### 1. How many breweries are present in each state?
 
-We answer this question by retrieving the value of `State` from the `Breweries` data.
+To answer this question we used table function to  retrieve the value of `State` from the `Breweries` data.
 ```{r}
 BrewPerState <-table(Breweries$State)
 BrewPerState
 
 ```
 ### 2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
-As part of our analysis, we ensured that duplicate data within each dataset shared the same variable name in both sets. We can now merge them into a single dataset, using `full_join`.
+We can merge them into a single dataset, using `full_join` unisng Brewery_id from Beers dataset and Brew_ID from Breweries dataset.
 ```{r}
 BrewPub <- merge(Beers, Breweries, by.x = "Brewery_id", by.y = "Brew_ID", all = TRUE)
 # Change variable names to more meaningful title
 
 BrewPub <- rename(BrewPub, c("Name.x"="Beer","Name.y"="Brewery",
                    "Ounces"="OZ"))
-
+# Used kable library to make document more presentable
 kable(BrewPub %>% head())
 
 kable(BrewPub %>% tail())
@@ -95,7 +95,7 @@ ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
   geom_bar(stat="identity", fill="red")+
   theme_bw() + 
   scale_color_economist()+
-  theme(axis.text.x=element_text(size=rel(0.8), angle=90)) +
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) +
   ggtitle("Median ABV by State") +
   labs(x="State",y="ABV")
 
@@ -108,7 +108,7 @@ ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
   geom_bar(stat="identity", fill="steelblue")+
   theme_economist() + 
   scale_color_economist()+
-  theme(axis.text.x=element_text(size=rel(0.8), angle=90))+
+  theme(axis.text.x=element_text(size=7, angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+
   ggtitle("Median IBU by State") +
   labs(x="State",y="IBU")
 Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
@@ -116,6 +116,9 @@ Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
 
 ## 5- Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
 ``` {r}
-Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
+# finding state which has has the maximum alcoholic (ABV) beer
 Max_ABV <- Alc[which.max(Alc$Median_ABV),]
+# finding state which has has the maximum alcoholic (IBU) beer
+Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
+
 ``` 
