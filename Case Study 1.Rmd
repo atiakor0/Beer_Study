@@ -44,9 +44,15 @@ BrewPub <- merge(Beers, Breweries, by.x = "Brewery_id", by.y = "Brew_ID", all = 
 BrewPub <- rename(BrewPub, c("Name.x"="Beer","Name.y"="Brewery",
                    "Ounces"="OZ"))
 # Used kable library to make document more presentable
-kable(BrewPub %>% head())
+kable(BrewPub %>% 
+         head()) %>%
+         kable_styling("striped", full_width = F)
+        
 
-kable(BrewPub %>% tail())
+kable(BrewPub %>% 
+         tail()) %>%
+         kable_styling("striped", full_width = F) 
+         
 
 ```
 
@@ -55,14 +61,15 @@ kable(BrewPub %>% tail())
 
 To do this, we use a function (which returns `true` if a given value is NA, `false` otherwise, using `is.na`) and `sapply` to determine the number of missing values for each column within `BrewPub`.
 
-Per the results, we find that there are a total of 62 ABV values missing, and 1005 IBU values missing. No other data is missing.
+Per the results, we find that there are a total of 62 ABV values missing, 1005 IBU values amd 5 Style values missing. No other data is missing.
 ```{r}
-MissingValues <- sapply(BrewPub, function(x)sum(is.na(x)))
+MissingValues <- sapply(BrewPub, function(MissingValue)sum(is.na(MissingValue)))
 
 # Used kable library to make document more presentable
-MissingValues %>%
+as.data.frame(MissingValues) %>%
   kable("html") %>%
-  kable_styling()
+  kable_styling("striped", full_width = F) 
+  
 
 ```
 
@@ -90,7 +97,7 @@ Bitter
 
 ```{r}
 # 4. b Plot a bar chart to compare ABV by state
-library(ggthemes)
+
 ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
   geom_bar(stat="identity", fill="red")+
   theme_bw() + 
@@ -106,19 +113,21 @@ ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
 # 4. c Plot a bar chart to compare IBU by state
 ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
   geom_bar(stat="identity", fill="steelblue")+
-  theme_economist() + 
+  theme_bw() + 
   scale_color_economist()+
-  theme(axis.text.x=element_text(size=7, angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+
+  theme(axis.text.x=element_text(size=7, angle=90),plot.title = element_text(size=14,hjust   = 0.5, face="bold.italic"))+
   ggtitle("Median IBU by State") +
   labs(x="State",y="IBU")
-Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
+
 ```
 
 ## 5- Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+
 ``` {r}
 # finding state which has has the maximum alcoholic (ABV) beer
 Max_ABV <- Alc[which.max(Alc$Median_ABV),]
+Max_ABV
 # finding state which has has the maximum alcoholic (IBU) beer
 Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
-
+Max_IBU
 ``` 
