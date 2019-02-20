@@ -1,0 +1,121 @@
+---
+title: "Case Study 1"
+author: "Allen Ansari,Audrene Tiakor"
+date: "February 17, 2019"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+setwd("E:/University/Doing Data Science/Unit 7")
+```
+
+
+```{r message=FALSE, warning=FALSE, , include=TRUE, paged.print=FALSE}
+library(ggplot2) # Data visualization
+library(readr) # CSV file I/O, e.g. the read_csv function
+library(dplyr) # Heavy use of this library
+library(tidyr)
+library(plyr)
+library(ggthemes) # for themes in ggplot
+library(knitr)
+library(kableExtra) # library to make the document more presentable
+```
+
+```{r}
+# Read in beer and breweries data set using _csv for more tidy output
+Beers <- read_csv('Beers.csv', col_types = cols())
+Breweries <- read_csv('Breweries.csv', col_types = cols())
+```
+
+### 1. How many breweries are present in each state?
+
+We answer this question by retrieving the value of `State` from the `Breweries` data.
+```{r}
+BrewPerState <-table(Breweries$State)
+BrewPerState
+
+```
+### 2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
+As part of our analysis, we ensured that duplicate data within each dataset shared the same variable name in both sets. We can now merge them into a single dataset, using `full_join`.
+```{r}
+BrewPub <- merge(Beers, Breweries, by.x = "Brewery_id", by.y = "Brew_ID", all = TRUE)
+# Change variable names to more meaningful title
+
+BrewPub <- rename(BrewPub, c("Name.x"="Beer","Name.y"="Brewery",
+                   "Ounces"="OZ"))
+
+kable(BrewPub %>% head())
+
+kable(BrewPub %>% tail())
+
+```
+
+### 3. Report the number of NA's in each column.
+
+
+To do this, we use a function (which returns `true` if a given value is NA, `false` otherwise, using `is.na`) and `sapply` to determine the number of missing values for each column within `BrewPub`.
+
+Per the results, we find that there are a total of 62 ABV values missing, and 1005 IBU values missing. No other data is missing.
+```{r}
+MissingValues <- sapply(BrewPub, function(x)sum(is.na(x)))
+
+# Used kable library to make document more presentable
+MissingValues %>%
+  kable("html") %>%
+  kable_styling()
+
+```
+
+### 4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+
+```{r}
+# 4. Compute the median alcohol content unit for each state.
+Alc <- BrewPub %>%
+  na.omit()  %>%
+group_by(State) %>%
+summarise_each(funs(median), Median_ABV = ABV) %>%
+arrange(Median_ABV)
+Alc
+```
+
+```{r}
+# 4. a Compute the median international bitterness unit for each state.
+Bitter <- BrewPub %>%
+  na.omit() %>%
+group_by(State) %>%
+summarise_each(funs(median), Median_IBU = IBU) %>%
+arrange(Median_IBU)
+Bitter
+```
+
+```{r}
+# 4. b Plot a bar chart to compare ABV by state
+library(ggthemes)
+ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
+  geom_bar(stat="identity", fill="red")+
+  theme_bw() + 
+  scale_color_economist()+
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90)) +
+  ggtitle("Median ABV by State") +
+  labs(x="State",y="ABV")
+
+```
+
+
+```{r}
+# 4. c Plot a bar chart to compare IBU by state
+ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  theme_economist() + 
+  scale_color_economist()+
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90))+
+  ggtitle("Median IBU by State") +
+  labs(x="State",y="IBU")
+Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
+```
+
+## 5- Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+``` {r}
+Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
+Max_ABV <- Alc[which.max(Alc$Median_ABV),]
+``` 
