@@ -19,6 +19,7 @@ library(plyr)
 library(ggthemes) # for themes in ggplot
 library(knitr)
 library(kableExtra) # library to make the document more presentable
+library(Amelia) # A Program for Missing Data
 ```
 
 ```{r}
@@ -69,7 +70,9 @@ MissingValues <- sapply(BrewPub, function(MissingValue)sum(is.na(MissingValue)))
 as.data.frame(MissingValues) %>%
   kable("html") %>%
   kable_styling("striped", full_width = F) 
-  
+ # creating Missing Map
+missmap(BrewPub, main="Beer Data - Missings Map", 
+        col=c("yellow", "black"), y.at=c(1),y.labels = c('')) 
 
 ```
 
@@ -131,3 +134,4 @@ Max_ABV
 Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
 Max_IBU
 ``` 
+
