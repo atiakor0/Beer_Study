@@ -19,7 +19,7 @@ library(plyr)
 library(ggthemes) # for themes in ggplot
 library(knitr)
 library(kableExtra) # library to make the document more presentable
-library(Amelia) # A Program for Missing Data
+library(Amelia) # for missing map
 ```
 
 ```{r}
@@ -70,9 +70,9 @@ MissingValues <- sapply(BrewPub, function(MissingValue)sum(is.na(MissingValue)))
 as.data.frame(MissingValues) %>%
   kable("html") %>%
   kable_styling("striped", full_width = F) 
- # creating Missing Map
-missmap(BrewPub, main="Beer Data - Missings Map", 
-        col=c("yellow", "black"), y.at=c(1),y.labels = c('')) 
+
+missmap(BrewPub,y.at=c(1),y.labels = c(''),col=c('yellow','black'))
+  
 
 ```
 
@@ -101,7 +101,7 @@ Bitter
 ```{r}
 # 4. b Plot a bar chart to compare ABV by state
 
-ggplot(data=Alc, aes(x=State, y=Median_ABV)) +
+ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
   geom_bar(stat="identity", fill="red")+
   theme_bw() + 
   scale_color_economist()+
@@ -118,9 +118,7 @@ ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
   geom_bar(stat="identity", fill="steelblue")+
   theme_bw() + 
   scale_color_economist()+
-  theme(axis.text.x=element_text(size=7, angle=90),plot.title = element_text(size=14,hjust   = 0.5, face="bold.italic"))+
-  ggtitle("Median IBU by State") +
-  labs(x="State",y="IBU")
+  theme(axis.text.x=element_text(size=7, angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Median IBU by State") + labs(x="State",y="IBU")
 
 ```
 
@@ -134,4 +132,25 @@ Max_ABV
 Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
 Max_IBU
 ``` 
+## 6- Summary statistics for the ABV variable
+To do this, we apply the function summary() to the variable ABV (alcohol content of our data set 'BrewPub'), which returns descriptive statistics of ABV such as the minimum value (smallest value of ABV), the first quartile, the median, the mean, the thrid quartile, and the maximum (largest value of ABV).
+``` {r}
+# summary statistics for the ABV variable
+summary(BrewPub$ABV)
+``` 
 
+## 7- Is there an apparent relationship between the bitterness of the beer and its alcoholic content?
+``` {r}
+# drawing a Scatter plot Bitterness of Beer vs Alcholic content
+ggplot(BrewPub, aes(x=BrewPub$IBU, y=BrewPub$ABV)) + geom_point() + geom_smooth(method=lm, se=FALSE) + theme(plot.title = element_text(size=14,hjust= 0.5, face="bold.italic")) + ggtitle("Relationship Between Bitterness of Beer and Its Alcoholic Content") +
+  labs(x="Bitterness",y="Alcoholic Content") 
+
+``` 
+After plotting a scatter plot to depict the relationship between the bitterness of the beer and its alcoholic content, we can see that there is a positive correlation between the bitterness of the beer and its alcoholic content. The higher the alcohol content, the more bitter the beer will taste. 
+
+## EDA##
+``` {r}
+Alch<-ggplot((BrewPub), aes(x = BrewPub$State, y = BrewPub$ABV)) + geom_boxplot() + theme(axis.text.x=element_text(size=7, angle=90), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Boxplot of Alcohol Content By State") + labs(x="State",y="AVC")
+
+Bitt<- ggplot((BrewPub), aes(x = BrewPub$State, y = BrewPub$IBU)) + geom_boxplot() + theme(axis.text.x=element_text(size=7, angle=90), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Boxplot of Beer Bitterness By State") + labs(x="State",y="IBU")
+``` 
