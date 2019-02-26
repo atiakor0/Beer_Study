@@ -6,7 +6,7 @@ output: html_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
-setwd("E:/University/Doing Data Science/Unit 7")
+setwd("C:\\Users\\Audrene\\Desktop\\Beer_Study-master")
 ```
 
 
@@ -115,9 +115,7 @@ ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
   geom_bar(stat="identity", fill="steelblue")+
   theme_bw() + 
   scale_color_economist()+
-  theme(axis.text.x=element_text(size=7, angle=90),plot.title = element_text(size=14,hjust   = 0.5, face="bold.italic"))+
-  ggtitle("Median IBU by State") +
-  labs(x="State",y="IBU")
+  theme(axis.text.x=element_text(size=7, angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Median IBU by State") + labs(x="State",y="IBU")
 
 ```
 
@@ -130,4 +128,26 @@ Max_ABV
 # finding state which has has the maximum alcoholic (IBU) beer
 Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
 Max_IBU
+``` 
+## 6- Summary statistics for the ABV variable
+To do this, we apply the function summary() to the variable ABV (alcohol content of our data set 'BrewPub'), which returns descriptive statistics of ABV such as the minimum value (smallest value of ABV), the first quartile, the median, the mean, the thrid quartile, and the maximum (largest value of ABV).
+``` {r}
+# summary statistics for the ABV variable
+summary(BrewPub$ABV)
+``` 
+
+## 7- Is there an apparent relationship between the bitterness of the beer and its alcoholic content?
+``` {r}
+# drawing a Scatter plot Bitterness of Beer vs Alcholic content
+ggplot(BrewPub, aes(x=BrewPub$IBU, y=BrewPub$ABV)) + geom_point() + geom_smooth(method=lm, se=FALSE) + theme(plot.title = element_text(size=14,hjust= 0.5, face="bold.italic")) + ggtitle("Relationship Between Bitterness of Beer and Its Alcoholic Content") +
+  labs(x="Bitterness",y="Alcoholic Content") 
+
+``` 
+After plotting a scatter plot to depict the relationship between the bitterness of the beer and its alcoholic content, we can see that there is a positive correlation between the bitterness of the beer and its alcoholic content. The higher the alcohol content, the more bitter the beer will taste. 
+
+## EDA##
+``` {r}
+Alch<-ggplot((BrewPub), aes(x = BrewPub$State, y = BrewPub$ABV)) + geom_boxplot() + theme(axis.text.x=element_text(size=7, angle=90), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Boxplot of Alcohol Content By State") + labs(x="State",y="AVC")
+
+Bitt<- ggplot((BrewPub), aes(x = BrewPub$State, y = BrewPub$IBU)) + geom_boxplot() + theme(axis.text.x=element_text(size=7, angle=90), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Boxplot of Beer Bitterness By State") + labs(x="State",y="IBU")
 ``` 
