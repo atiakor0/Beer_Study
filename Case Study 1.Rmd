@@ -101,7 +101,7 @@ Bitter
 ```{r}
 # 4. b Plot a bar chart to compare ABV by state
 
-ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
+ggplot(data=Alc, aes(x=State, y=Median_ABV)) +
   geom_bar(stat="identity", fill="red")+
   theme_bw() + 
   scale_color_economist()+
