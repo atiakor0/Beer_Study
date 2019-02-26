@@ -1,0 +1,164 @@
+---
+title: "Codebook For Case Study 1"
+author: "Allen Ansari,Audrene Tiakor"
+date: "February 17, 2019"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Backstory
+A client is expecting a baby soon. He needs help deciding on what to name the child. He hired me to figure out popular names. He provided raw data in order to help me make a decision.
+
+###Libraries used:
+``````````
+library(ggplot2) # Data visualization
+library(readr) # CSV file I/O, e.g. the read_csv function
+library(dplyr) # Heavy use of this library
+library(tidyr)
+library(plyr)
+library(ggthemes) # for themes in ggplot
+library(knitr)
+library(kableExtra) # library to make the document more presentable
+``````````
+#Raw Data
+The raw data for this task consists of the following data sets:
+
+**Beers.csv** This file contains a list of 2410 US craft Beers. The data descriptions are as follows:
+- Name: Name of the beer.
+- Beer_ID: Unique identifier of the beer.
+- ABV: Alcohol by volume of the beer.
+- IBU: International Bitterness Units of the beer. 
+- Brewery_ID: Brewery id associated with the beer.
+- Style: Style of the beer.
+- Ounces: Ounces of beer. 
+
+**Breweries.csv** This file contains 558 US breweries. The data descriptions are as follows: 
+- Brew_ID: Unique identifier of the brewery.
+- Name: Name of the brewery.
+- City: City where the brewery is located.
+- State: U.S. State where the brewery is located.
+
+#Variables created with Explaination:
+* **Beers** - variable created for raw data 'Beers.csv'
+* **Breweries** - variable created for raw data 'Breweries.csv'
+* **BrewPerState** - variable created to show the number of breweries in each state
+* **BrewPub** - variable created for the merge of Beers and Breweries data sets
+* **Alc** - variable for function created to compute the median alcohol content unit for each state
+* **Bitter** - variable created to compute the median international bitterness unit for each state
+* **Max_ABV** - variable created to find the state which has has the maximum alcoholic (ABV) beer
+* **Max_IBU**- variable created to find state which has has the maximum alcoholic (IBU) beer
+
+##Tidy Data (Steps for how to go from raw to tidy data to serve question of interest)
+
+#### Import/ merge data sets 'Beers' and 'Breweries':
+
+``````````
+# import Beers and Breweries files
+Beers <- read_csv('Beers.csv', col_types = cols())
+Breweries <- read_csv('Breweries.csv', col_types = cols())
+
+# Merge Beers and Breweries files
+BrewPub <- merge(Beers, Breweries, by.x = "Brewery_id", by.y = "Brew_ID", all = TRUE)
+
+# Change variable names to more meaningful title
+BrewPub <- rename(BrewPub, c("Name.x"="Beer","Name.y"="Brewery",
+                   "Ounces"="OZ"))
+
+# Used kable library to make document more presentable
+kable(BrewPub %>% 
+         head()) %>%
+         kable_styling("striped", full_width = F)
+        
+
+kable(BrewPub %>% 
+         tail()) %>%
+         kable_styling("striped", full_width = F) 
+
+
+
+``````````
+##Analyzing The Data:
+Since, we are focusing on the alcohol content and the international bitterness for each state, we would like to use EDA to look at the missing values, the  median IBU and ACV by state, the maximum IBU and ABV by state, and use a scatter plot to see if there is an apparent relations ship between ABV and IBU.
+
+#### Report the number of NA's in each column
+````````
+MissingValues <- sapply(BrewPub, function(MissingValue)sum(is.na(MissingValue)))
+
+# Used kable library to make document more presentable
+as.data.frame(MissingValues) %>%
+  kable("html") %>%
+  kable_styling("striped", full_width = F) 
+````````
+#### Compute the Median of the alcohol content (ABV) and International Bitterness Unit (IBU) with respective plots
+``````````
+# Median of alcohol content
+Alc <- BrewPub %>%
+  na.omit()  %>%
+group_by(State) %>%
+summarise_each(funs(median), Median_ABV = ABV) %>%
+arrange(Median_ABV)
+Alc
+
+#Plot of Median ABV by State
+
+ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
+  geom_bar(stat="identity", fill="red")+
+  theme_bw() + 
+  scale_color_economist()+
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) +
+  ggtitle("Median ABV by State") +
+  labs(x="State",y="ABV")
+
+#Median of international bitterness unit
+
+Bitter <- BrewPub %>%
+  na.omit() %>%
+group_by(State) %>%
+summarise_each(funs(median), Median_IBU = IBU) %>%
+arrange(Median_IBU)
+Bitter
+
+#Plot of Median IBU by State
+
+ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  theme_bw() + 
+  scale_color_economist()+
+  theme(axis.text.x=element_text(size=7, angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Median IBU by State") + labs(x="State",y="IBU")
+``````````
+####Find Which state has the Most ABV and IBU
+````````
+#maximum ABV by state
+
+Max_ABV <- Alc[which.max(Alc$Median_ABV),]
+Max_ABV
+
+#maximum IBU by state
+Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
+Max_IBU
+
+````````
+####Find the summary statitistics for both ABV and IBU
+````````
+#summary statitics for Alcohol Content
+summary(BrewPub$ABV)
+
+#summary statistics for International Bitterness Unit
+summary(BrewPub$IBU)
+
+````````
+####Plot Scatter plot to see if there is an apparent relationship between IBU and ACV
+``````````
+ggplot(BrewPub, aes(x=BrewPub$IBU, y=BrewPub$ABV)) + geom_point() + geom_smooth(method=lm, se=FALSE) + theme(plot.title = element_text(size=14,hjust= 0.5, face="bold.italic")) + ggtitle("Relationship Between Bitterness of Beer and Its Alcoholic Content") +
+  labs(x="Bitterness",y="Alcoholic Content") 
+
+``````````
+## Regression Line to quantify the apparent relationship between IBU and ACV
+
+## Conclusion
+
+
