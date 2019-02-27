@@ -34,12 +34,12 @@ Breweries <- read_csv('Breweries.csv', col_types = cols())
 
 To answer this question we used table function to  retrieve the value of `State` from the `Breweries` data.
 ```{r}
-BrewPerState <-table(Breweries$State)
-BrewPerState
+BrewPerState <- table(Breweries$State)
+BrewPerState 
 
 ```
 ### 2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
-We can merge them into a single dataset, using `full_join` unisng Brewery_id from Beers dataset and Brew_ID from Breweries dataset.
+We can merge them into a single dataset, using `full_join` by Brewery_id from Beers dataset and Brew_ID from Breweries dataset.
 ```{r}
 BrewPub <- merge(Beers, Breweries, by.x = "Brewery_id", by.y = "Brew_ID", all = TRUE)
 # Change variable names to more meaningful title
@@ -62,7 +62,7 @@ kable(BrewPub %>%
 ### 3. Report the number of NA's in each column.
 
 
-To do this, we use a function (which returns `true` if a given value is NA, `false` otherwise, using `is.na`) and `sapply` to determine the number of missing values for each column within `BrewPub`.
+To do this, we use a function (which returns `true` if a given value is NA, `false` otherwise, using `is.na`) and `sapply` to determine the number of missing values for each column within `BrewPub`. and also used missmap function from Amelia library to create missing data map.
 
 Per the results, we find that there are a total of 62 ABV values missing, 1005 IBU values amd 5 Style values missing. No other data is missing.
 ```{r}
@@ -81,7 +81,7 @@ missmap(BrewPub,y.at=c(1),y.labels = c(''),col=c('yellow','black'))
 ### 4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
 
 ```{r}
-# 4. Compute the median alcohol content unit for each state.
+# 4.a Compute the median alcohol content unit for each state.
 Alc <- BrewPub %>%
   na.omit()  %>%
 group_by(State) %>%
@@ -91,7 +91,7 @@ Alc
 ```
 
 ```{r}
-# 4. a Compute the median international bitterness unit for each state.
+# 4. b Compute the median international bitterness unit for each state.
 Bitter <- BrewPub %>%
   na.omit() %>%
 group_by(State) %>%
@@ -101,9 +101,9 @@ Bitter
 ```
 
 ```{r}
-# 4. b Plot a bar chart to compare ABV by state
+# 4. c Plot a bar chart to compare ABV by state
 
-ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
+ggplot(data=Alc, aes(x=State, y=Median_ABV)) +
   geom_bar(stat="identity", fill="red")+
   theme_bw() + 
   scale_color_economist()+
@@ -115,7 +115,7 @@ ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
 
 
 ```{r}
-# 4. c Plot a bar chart to compare IBU by state
+# 4. d Plot a bar chart to compare IBU by state
 ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
   geom_bar(stat="identity", fill="steelblue")+
   theme_bw() + 
@@ -124,7 +124,8 @@ ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
 
 ```
 
-## 5- Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+## 5- Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer? 
+By using which.max function and indexing we found ME has maximum ABV and IBU
 
 ``` {r}
 # finding state which has has the maximum alcoholic (ABV) beer
@@ -143,12 +144,14 @@ summary(BrewPub$ABV)
 ``` 
 
 ## 7- Is there an apparent relationship between the bitterness of the beer and its alcoholic content?
+
 ``` {r}
 # drawing a Scatter plot Bitterness of Beer vs Alcholic content
 ggplot(BrewPub, aes(x=BrewPub$IBU, y=BrewPub$ABV)) + geom_point() + geom_smooth(method=lm, se=FALSE) + theme(plot.title = element_text(size=14,hjust= 0.5, face="bold.italic")) + ggtitle("Relationship Between Bitterness of Beer and Its Alcoholic Content") +
   labs(x="Bitterness",y="Alcoholic Content") 
 
 ``` 
+
 After plotting a scatter plot to depict the relationship between the bitterness of the beer and its alcoholic content, we can see that there is a positive correlation between the bitterness of the beer and its alcoholic content. The higher the alcohol content, the more bitter the beer will taste. 
 
 ## EDA##
@@ -163,27 +166,18 @@ names(State) <- c("State" , "Region")
 # Merge State by BrewPub
 BrewRegion <- merge(BrewPub,State, by="State")
 
-# Replacing IBU Missing Value by Region mean
-BrewRegion[is.na(BrewRegion$IBU), "IBU"] <- tapply(BrewRegion$IBU, BrewRegion$Region, mean,na.rm=TRUE)[ BrewRegion[is.na(BrewRegion$IBU),"Region"]] 
-
-# Replacing ABV Missing Value by Region mean
-BrewRegion[is.na(BrewRegion$ABV), "ABV"] <- tapply(BrewRegion$ABV, BrewRegion$Region, mean,na.rm=TRUE)[ BrewRegion[is.na(BrewRegion$ABV),"Region"]] 
-
-# Missing Map after replacing NAs by mean
-
-missmap(BrewRegion,y.at=c(1),y.labels = c(''),col=c('yellow','black'))
 
 ```
 
 
 ``` {r}
 # Histogram of ABV
-ABV_Hist <- ggplot(BrewRegion,aes(x=ABV)) + geom_histogram(aes(fill=Region)) +theme(axis.text.x=element_text(size=7), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Histogram of Alcohol Content By Region") + labs(x="ABV",y="Count")
+ABV_Hist <- ggplot(BrewRegion,aes(x=ABV)) + geom_histogram(colour="black", fill="white") +theme(axis.text.x=element_text(size=7), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) + theme_bw() + ggtitle("Histogram of Alcohol Content By Region") + labs(x="ABV",y="Count") +  facet_grid(Region ~ .)
 ABV_Hist
 
 # Histogram of IBU
-ABV_Hist <- ggplot(BrewRegion,aes(x=IBU)) + geom_histogram(aes(fill=Region)) +theme(axis.text.x=element_text(size=7), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Histogram of Beer Bitterness By Region") + labs(x="IBU",y="Count")
-ABV_Hist
+IBU_Hist <- ggplot(BrewRegion,aes(x=IBU)) + geom_histogram(colour="black", fill="white") +theme(axis.text.x=element_text(size=7), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) + theme_bw() + ggtitle("Histogram of Beer Bitterness By Region") + labs(x="IBU",y="Count") + facet_grid(Region ~ .)
+IBU_Hist
 
 # Boxplot of Alcohol Content By Region
 Alch<-ggplot((BrewRegion), aes(x = Region, y = ABV)) + geom_boxplot() + theme(axis.text.x=element_text(size=7, angle=90), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Boxplot of Alcohol Content By Region") + labs(x="Region",y="ABV")
@@ -199,7 +193,7 @@ ggplot(BrewRegion, aes(x=Region, y=ABV)) +
   theme_bw() + 
   scale_color_economist()+
   theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) +
-  ggtitle("Median ABV by Region") +
+  ggtitle("Barplot of Alcohol Content By Region") +
   labs(x="Region",y="ABV")
 
 # IBU per Region Bar plot
@@ -208,7 +202,7 @@ ggplot(BrewRegion, aes(x=Region, y=IBU)) +
   theme_bw() + 
   scale_color_economist()+
   theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) +
-  ggtitle("Median IBU by Region") +
+  ggtitle("Barplot of Beer Bitterness By Region") +
   labs(x="Region",y="IBU")
 
 #  Plot a bar chart to compare Median of ABV by Region
@@ -244,13 +238,13 @@ BeerABV.aov <- aov(ABV ~ Region, data = BrewRegion)
 # Summary of the analysis
 summary(BeerABV.aov)
 
-# There is no evidence showing that at confidence level of 0.05 the mean of ABV in each region are different (P-Value = 0.02) 
+# There is no evidence showing that at confidence level of 0.05 the mean of ABV in each region are the same (P-Value = 0.02) 
 
 # Compute the analysis of variance for IBU mean
 BeerIBU.aov <- aov(IBU ~ Region, data = BrewRegion)
 # Summary of the analysis
 summary(BeerIBU.aov)
 
-# There is no evidence showing that at confidence level of 0.05 the mean of IBU in each region are different (P-Value < 0.0001) 
+# There is no evidence showing that at confidence level of 0.05 the mean of IBU in each region are the same (P-Value = 0.0031) 
 
 ```
