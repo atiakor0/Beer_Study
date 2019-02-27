@@ -238,13 +238,21 @@ BeerABV.aov <- aov(ABV ~ Region, data = BrewRegion)
 # Summary of the analysis
 summary(BeerABV.aov)
 
+<<<<<<< HEAD
 # There is no evidence showing that at confidence level of 0.05 the mean of ABV in each region are the same (P-Value = 0.02) 
+=======
+# There is strong evidence showing that at confidence level of 0.05 the mean of ABV in each region are different (P-Value = 0.02) 
+>>>>>>> 7dc27bfc8ddd537f458fb6c6a54a293573088ee3
 
 # Compute the analysis of variance for IBU mean
 BeerIBU.aov <- aov(IBU ~ Region, data = BrewRegion)
 # Summary of the analysis
 summary(BeerIBU.aov)
 
+<<<<<<< HEAD
 # There is no evidence showing that at confidence level of 0.05 the mean of IBU in each region are the same (P-Value = 0.0031) 
+=======
+# There is strong evidence showing that at confidence level of 0.05 the mean of IBU in each region are different (P-Value < 0.0001) 
+>>>>>>> 7dc27bfc8ddd537f458fb6c6a54a293573088ee3
 
 ```
