@@ -140,8 +140,7 @@ Max_IBU
 To do this, we apply the function summary() to the variable ABV (alcohol content of our data set 'BrewPub'), which returns descriptive statistics of ABV such as the minimum value (smallest value of ABV), the first quartile, the median, the mean, the thrid quartile, and the maximum (largest value of ABV).
 ``` {r}
 # summary statistics for the ABV variable
-ABVSumm <- summary(BrewPub$ABV)
-kable(as.table(ABVSumm)
+summary(BrewPub$ABV)
 ``` 
 
 ## 7- Is there an apparent relationship between the bitterness of the beer and its alcoholic content?
