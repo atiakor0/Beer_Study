@@ -6,7 +6,7 @@ output: html_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
-setwd("C:\\Users\\Audrene\\Desktop\\Beer_Study-master")
+setwd("E:/University/Doing Data Science/Unit 7/Beer_Study")
 ```
 
 
