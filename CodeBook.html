@@ -194,7 +194,7 @@ $(document).ready(function () {
 
 <div id="backstory" class="section level1">
 <h1>Backstory</h1>
-<p>A client is expecting a baby soon. He needs help deciding on what to name the child. He hired me to figure out popular names. He provided raw data in order to help me make a decision.</p>
+<p>The CEO and CFO of Budweiser (my client) has given me as a Data Scientist two separate data sets with the intent of reporting any interesting findings uncovered after strategically applying certain tools and concepts to these datasets. The strategic tools and concepts that will be used in application is tidying the data (merging the two datasets and making the data ready for analysis), finding the number of breweries in each state, computing the median alcohol content (ABV) and international betterness of each state (IBU), finding which state has the the maximum alcohol content and which state has the most bitter beer. After these analyses, the question ‘Is there an apparent relationship between the bitterness of the beer and its alcoholic content?’ will be answered to ignite a further analysis into what interesting things that this data has for us to uncover.</p>
 <div id="libraries-used" class="section level3">
 <h3>Libraries used:</h3>
 <pre><code>library(ggplot2) # Data visualization
@@ -224,6 +224,16 @@ library(kableExtra) # library to make the document more presentable</code></pre>
 <li><strong>Bitter</strong> - variable created to compute the median international bitterness unit for each state</li>
 <li><strong>Max_ABV</strong> - variable created to find the state which has has the maximum alcoholic (ABV) beer</li>
 <li><strong>Max_IBU</strong>- variable created to find state which has has the maximum alcoholic (IBU) beer</li>
+<li><strong>StateAbb</strong>- variable used to denote the creation of the region column</li>
+<li><strong>StateRegion</strong>- variable used to name the dataframe State.region</li>
+<li><strong>State</strong>- variable used to show the step of combinding the region column to the original dataset ‘BrewPub’ by the State column</li>
+<li><strong>BrewRegion</strong>- variable created for the final merge of the column region to the original dataset</li>
+<li><strong>ABV_Hist</strong>- variable for the histogram of the alcohol by volume of beer by region</li>
+<li><strong>IBU_Hist</strong>- variable for the histogram of the international bitterness units of beer by region</li>
+<li><strong>IBU_Box</strong>- variable for the boxplot of the international bitterness units of beer by region</li>
+<li><strong>ABV_Box</strong>- variable created to find state which has has the maximum alcoholic (IBU) beer by region</li>
+<li><strong>BeerABV.aov</strong>- variable for the Analysis of Variance for the ABV mean by region</li>
+<li><strong>BeerIBU.aov</strong>- variable for the Analysis of Variance for the IBU mean by region</li>
 </ul>
 <div id="tidy-data-steps-for-how-to-go-from-raw-to-tidy-data-to-serve-question-of-interest" class="section level2">
 <h2>Tidy Data (Steps for how to go from raw to tidy data to serve question of interest)</h2>
@@ -253,10 +263,6 @@ kable(BrewPub %&gt;%
 
 </code></pre>
 </div>
-</div>
-<div id="analyzing-the-data" class="section level2">
-<h2>Analyzing The Data:</h2>
-<p>Since, we are focusing on the alcohol content and the international bitterness for each state, we would like to use EDA to look at the missing values, the median IBU and ACV by state, the maximum IBU and ABV by state, and use a scatter plot to see if there is an apparent relations ship between ABV and IBU.</p>
 <div id="report-the-number-of-nas-in-each-column" class="section level4">
 <h4>Report the number of NA’s in each column</h4>
 <pre><code>MissingValues &lt;- sapply(BrewPub, function(MissingValue)sum(is.na(MissingValue)))
@@ -266,6 +272,33 @@ as.data.frame(MissingValues) %&gt;%
   kable(&quot;html&quot;) %&gt;%
   kable_styling(&quot;striped&quot;, full_width = F) </code></pre>
 </div>
+<div id="creating-a-region-column-to-look-at-abv-and-ibu-by-region" class="section level4">
+<h4>Creating a Region Column to look at ABV and IBU by Region</h4>
+<pre><code># Creating Region Col
+StateAbb &lt;- as.data.frame(state.abb) # usnig stat.abb dataset 
+StateRegion &lt;- as.data.frame(state.region) # using state.region dataset
+# Combine 2 datasets
+State &lt;- cbind(StateAbb,StateRegion)
+names(State) &lt;- c(&quot;State&quot; , &quot;Region&quot;)
+# Merge State by BrewPub
+BrewRegion &lt;- merge(BrewPub,State, by=&quot;State&quot;)</code></pre>
+</div>
+<div id="replacing-missing-values-in-ibu-and-abv-column-with-their-respective-means" class="section level4">
+<h4>Replacing missing values in IBU and ABV column with their respective means</h4>
+<pre><code># Replacing IBU Missing Value by Region mean
+BrewRegion[is.na(BrewRegion$IBU), &quot;IBU&quot;] &lt;- tapply(BrewRegion$IBU, BrewRegion$Region, mean,na.rm=TRUE)[ BrewRegion[is.na(BrewRegion$IBU),&quot;Region&quot;]] 
+
+# Replacing ABV Missing Value by Region mean
+BrewRegion[is.na(BrewRegion$ABV), &quot;ABV&quot;] &lt;- tapply(BrewRegion$ABV, BrewRegion$Region, mean,na.rm=TRUE)[ BrewRegion[is.na(BrewRegion$ABV),&quot;Region&quot;]]
+
+# Missing Map after replacing NAs by mean
+
+missmap(BrewRegion,y.at=c(1),y.labels = c(''),col=c('yellow','black'))</code></pre>
+</div>
+</div>
+<div id="analyzing-the-data-by-state" class="section level2">
+<h2>Analyzing The Data (By State):</h2>
+<p>Since, we are focusing on the alcohol content and the international bitterness for each state, we would like to use EDA to look at the missing values, the median IBU and ACV by state, the maximum IBU and ABV by state, and use a scatter plot to see if there is an apparent relations ship between ABV and IBU.</p>
 <div id="compute-the-median-of-the-alcohol-content-abv-and-international-bitterness-unit-ibu-with-respective-plots" class="section level4">
 <h4>Compute the Median of the alcohol content (ABV) and International Bitterness Unit (IBU) with respective plots</h4>
 <pre><code># Median of alcohol content
@@ -330,12 +363,113 @@ summary(BrewPub$IBU)
   labs(x=&quot;Bitterness&quot;,y=&quot;Alcoholic Content&quot;) 
 </code></pre>
 </div>
+<div id="regression-line-for-relationship-between-ibu-and-abv" class="section level3">
+<h3>Regression Line for relationship between IBU and ABV</h3>
+<pre><code># Compute ANOVA for ABV and IBU
+reg1 &lt;- lm(ABV ~ IBU, data = BrewPub)
+# Summary of reg 1
+summary(reg1)
+
+# Create a function to pull the data out of a linear regression, return values such as  (R-squares, slope, intercept and P value) at the top of a nice ggplot graph with the regression line.
+Regressionplot &lt;- function (reg) {
+ 
+require(ggplot2)
+
+ ggplot(reg$model, aes_string(x = names(reg$model)[2], y = names(reg$model)[1])) + geom_point() + stat_smooth(method = &quot;lm&quot;, col = &quot;red&quot;) + labs(title = paste(&quot;Adj R2 = &quot;,signif(summary(reg)$adj.r.squared, 5), &quot;Intercept =&quot;,signif(reg$coef[[1]],5 ), &quot; Slope =&quot;,signif(reg$coef[[2]], 5), &quot; P =&quot;,signif(summary(reg)$coef[2,4], 5)))
+ }
+
+# Compute reg1
+reg1 &lt;- lm(ABV ~ IBU, data = BrewPub)
+# Summary of reg 1
+summary(reg1)
+#Final regression plot with R^2 adj, intercept/slope of linear regression line, and p-value
+Regressionplot(reg1)
+</code></pre>
+<p>There is strong evidence that our regression model is statistically signicficant with a p-value of 3.2634e^(-184). In other words, the coefficients of our model are not equal to zero, which is an indication that there exist a relationship between International Bitterness Unit and Alcohol by volume of the beer. This relationship can be modeled by the following linear regression equation: ABV = 0.04493 + 0.000350(IBU). This equation can be used to predict ABV, when we only have IBU for information. Also, notice that the adjusted R^2, is 0.44934. This value tells us that 44.93% of variation in ABV is explained by this model (the linear relationship between IBU and ABV).</p>
 </div>
-<div id="regression-line-to-quantify-the-apparent-relationship-between-ibu-and-acv" class="section level2">
-<h2>Regression Line to quantify the apparent relationship between IBU and ACV</h2>
+</div>
+<div id="further-analysis-of-the-data-by-region" class="section level2">
+<h2>Further Analysis of The Data (By Region):</h2>
+<p>After using the visual evidence of the scatter plot of the relationship between IBU and ACV, further analysis was used to look at the IBU and ACV of regions. The states were taken and split into the following regions: South, West, Northeast, and North Central . After each state was separated into their respective regions, Explanatory Data Analysis and ANOVA was used to see if there was any significant results between IBU and ACV of each region.</p>
+<pre><code># Histogram of ABV
+ABV_Hist &lt;- ggplot(BrewRegion,aes(x=ABV)) + geom_histogram(aes(fill=Region)) +theme(axis.text.x=element_text(size=7), plot.title = element_text(size=14,hjust = 0.5, face=&quot;bold.italic&quot;))+ ggtitle(&quot;Histogram of Alcohol Content By Region&quot;) + labs(x=&quot;ABV&quot;,y=&quot;Count&quot;)
+ABV_Hist
+
+# Histogram of IBU
+ABV_Hist &lt;- ggplot(BrewRegion,aes(x=IBU)) + geom_histogram(aes(fill=Region)) +theme(axis.text.x=element_text(size=7), plot.title = element_text(size=14,hjust = 0.5, face=&quot;bold.italic&quot;))+ ggtitle(&quot;Histogram of Beer Bitterness By Region&quot;) + labs(x=&quot;IBU&quot;,y=&quot;Count&quot;)
+ABV_Hist
+
+# Boxplot of Alcohol Content By Region
+Alch&lt;-ggplot((BrewRegion), aes(x = Region, y = ABV)) + geom_boxplot() + theme(axis.text.x=element_text(size=7, angle=90), plot.title = element_text(size=14,hjust = 0.5, face=&quot;bold.italic&quot;))+ ggtitle(&quot;Boxplot of Alcohol Content By Region&quot;) + labs(x=&quot;Region&quot;,y=&quot;ABV&quot;)
+Alch
+
+# Boxplot of Beer Bitterness By Region
+Bitt&lt;- ggplot((BrewRegion), aes(x = Region, y = IBU)) + geom_boxplot() + theme(axis.text.x=element_text(size=7, angle=90), plot.title = element_text(size=14,hjust = 0.5, face=&quot;bold.italic&quot;))+ ggtitle(&quot;Boxplot of Beer Bitterness By Region&quot;) + labs(x=&quot;Region&quot;,y=&quot;IBU&quot;)
+Bitt
+
+# ABV per Region Bar Plot
+ggplot(BrewRegion, aes(x=Region, y=ABV)) +
+  geom_bar(stat=&quot;identity&quot;, fill=&quot;red&quot;)+
+  theme_bw() + 
+  scale_color_economist()+
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face=&quot;bold.italic&quot;)) +
+  ggtitle(&quot;Median ABV by Region&quot;) +
+  labs(x=&quot;Region&quot;,y=&quot;ABV&quot;)
+
+# IBU per Region Bar plot
+ggplot(BrewRegion, aes(x=Region, y=IBU)) +
+  geom_bar(stat=&quot;identity&quot;, fill=&quot;red&quot;)+
+  theme_bw() + 
+  scale_color_economist()+
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face=&quot;bold.italic&quot;)) +
+  ggtitle(&quot;Median IBU by Region&quot;) +
+  labs(x=&quot;Region&quot;,y=&quot;IBU&quot;)
+
+#  Plot a bar chart to compare Median of ABV by Region
+
+BrewRegion %&gt;%   na.omit() %&gt;%
+group_by(Region) %&gt;%
+summarise_each(funs(median), Median_ABV = ABV) %&gt;% ggplot(aes(x=Region, y=sort(Median_ABV,decreasing = TRUE))) +
+  geom_bar(stat=&quot;identity&quot;, fill=&quot;red&quot;)+
+  theme_bw() + 
+  scale_color_economist()+
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face=&quot;bold.italic&quot;)) +
+  ggtitle(&quot;Median ABV by Region&quot;) +
+  labs(x=&quot;Region&quot;,y=&quot;ABV&quot;)
+
+#  Plot a bar chart to compare Median of IBU by Region
+
+BrewRegion %&gt;%   na.omit() %&gt;%
+group_by(Region) %&gt;%
+summarise_each(funs(median), Median_IBU = IBU) %&gt;% ggplot(aes(x=Region, y=sort(Median_IBU,decreasing = TRUE))) +
+  geom_bar(stat=&quot;identity&quot;, fill=&quot;red&quot;)+
+  theme_bw() + 
+  scale_color_economist()+
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face=&quot;bold.italic&quot;)) +
+  ggtitle(&quot;Median IBU by Region&quot;) +
+  labs(x=&quot;Region&quot;,y=&quot;IBU&quot;)
+</code></pre>
+<div id="analysis-of-variance" class="section level3">
+<h3>Analysis Of Variance</h3>
+<pre><code># Compute the analysis of variance for ABV mean
+BeerABV.aov &lt;- aov(ABV ~ Region, data = BrewRegion)
+# Summary of the analysis
+summary(BeerABV.aov)
+
+# There is strong evidence showing that at confidence level of 0.05 the mean of ABV in each region are different (P-Value = 0.02) 
+
+# Compute the analysis of variance for IBU mean
+BeerIBU.aov &lt;- aov(IBU ~ Region, data = BrewRegion)
+# Summary of the analysis
+summary(BeerIBU.aov)
+
+# There is strong evidence showing that at confidence level of 0.05 the mean of IBU in each region are different (P-Value &lt; 0.0001) 
+</code></pre>
+</div>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
+<p>After using the strategic tools and concepts that will be used in application is tidying the data (merging the two datasets and making the data ready for analysis), finding the number of breweries in each state, computing the median alcohol content (ABV) and international betterness of each state (IBU), finding which state has the the maximum alcohol content and which state has the most bitter beer. The question ‘Is there an apparent relationship between the bitterness of the beer and its alcoholic content?’, was answered. After plotting the data using a scatterplot there was strong visual evidence of the existence of a relationship between IBU and ACV. Since the answer to the question was a ‘yes’, further analysis was taken. An Anova was conducted to see if there was a difference in IBU and AVC. The conclusion to that particualar test was that there was a relationship between IBU and ACV. With this conclusion a linear regression model was constructed and an equation for the model was found. After noticing that there was an apparent relationship between IBU and ACV by state, advanced analysis of the data was conducted looking at the IBU and ACV by regions. The regions in which states were categorized are: South, West, Northeast, and North Central. After catergorizing states into regions, histograms, boxplots, and barplots were used to depict the IBV and ABV by regions and the medians of the IBV and ABV were also plotted by histograms, boxplots, and barplots. Final analysis include an Analysis of Variance (ANOVA), to test the claim that ABC and IBU differ by region. In conclusion, our interesting find from the data after such analyses is that there is an apparent relationshiop between the International Bitterness Unit (IBU) and Alcohol Content by Volume (ABV). In relation to beer and beer sales, one, because of the relationship between IBU and ABV, you can predict the ABV given an IBU. Also, when braking the relationship between IBU and ABV by region or state, we can closely look at the preference of regions to increase sales. We could even investigate ways to give a certain region or population a great beer to give a ‘buzz’ without a high IBU or craft a great beer with a high IBU without a high ABV. In the long run, this discovery of the relationship between IBU and ABV, can be used in a constructive way for a win-win situation in the future.</p>
 </div>
 </div>
 
