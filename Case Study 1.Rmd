@@ -129,10 +129,10 @@ By using which.max function and indexing we found ME has maximum ABV and IBU
 
 ``` {r}
 # finding state which has has the maximum alcoholic (ABV) beer
-Max_ABV <- Alc[which.max(Alc$Median_ABV),]
+Max_ABV <- BrewPub[which.max(BrewPub$ABV),]
 Max_ABV
 # finding state which has has the maximum alcoholic (IBU) beer
-Max_IBU <- Bitter[which.max(Bitter$Median_IBU),]
+Max_IBU <- BrewPub[which.max(BrewPub$IBU),]
 Max_IBU
 
 ``` 
@@ -208,8 +208,8 @@ ABV_Hist <- ggplot(BrewRegion,aes(x=ABV)) + geom_histogram(aes(fill=Region)) +th
 ABV_Hist
 
 # Histogram of IBU
-IBU_Hist <- ggplot(BrewRegion,aes(x=IBU)) + geom_histogram(aes(fill=Region)) +theme(axis.text.x=element_text(size=7), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Histogram of Beer Bitterness By Region") + labs(x="IBU",y="Count")
-ABV_Hist
+IBU_Hist <- ggplot(BrewRegion,aes(x=IBU)) + geom_histogram(aes(fill=Region)) +theme(axis.text.x=element_text(size=7), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) + ggtitle("Histogram of Beer Bitterness By Region") + labs(x="IBU",y="Count")
+IBU_Hist
 
 # Boxplot of Alcohol Content By Region
 ABV_Box<-ggplot((BrewRegion), aes(x = Region, y = ABV)) + geom_boxplot() + theme(axis.text.x=element_text(size=7, angle=90), plot.title = element_text(size=14,hjust = 0.5, face="bold.italic"))+ ggtitle("Boxplot of Alcohol Content By Region") + labs(x="Region",y="ABV")
