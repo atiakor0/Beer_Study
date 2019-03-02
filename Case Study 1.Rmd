@@ -6,7 +6,7 @@ output: html_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
-setwd("E:/University/Doing Data Science/Unit 7/Beer_Study")
+setwd("~/study/study/Beer_Study")
 ```
 
 
@@ -22,6 +22,8 @@ library(kableExtra) # library to make the document more presentable
 library(Amelia) # for missing map
 library(datasets) # to make region col
 library(zoo)
+library(agricolae)
+library(naniar)
 ```
 
 ```{r}
@@ -34,12 +36,14 @@ Breweries <- read_csv('Breweries.csv', col_types = cols())
 
 To answer this question we used table function to  retrieve the value of `State` from the `Breweries` data.
 ```{r}
-BrewPerState <- table(Breweries$State)
-BrewPerState 
-kable(BrewPerState)
+BrewPerState <-table(Breweries$State)
+BrewPerState
+
 ```
+
 ### 2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
-We can merge them into a single dataset, using `full_join` by Brewery_id from Beers dataset and Brew_ID from Breweries dataset.
+We can merge them into a single dataset, using `full_join` unisng Brewery_id from Beers dataset and Brew_ID from Breweries dataset.
+
 ```{r}
 BrewPub <- merge(Beers, Breweries, by.x = "Brewery_id", by.y = "Brew_ID", all = TRUE)
 # Change variable names to more meaningful title
@@ -61,10 +65,10 @@ kable(BrewPub %>%
 
 ### 3. Report the number of NA's in each column.
 
-
-To do this, we use a function (which returns `true` if a given value is NA, `false` otherwise, using `is.na`) and `sapply` to determine the number of missing values for each column within `BrewPub`. and also used missmap function from Amelia library to create missing data map.
+To do this, we use a function (which returns `true` if a given value is NA, `false` otherwise, using `is.na`) and `sapply` to determine the number of missing values for each column within `BrewPub`.
 
 Per the results, we find that there are a total of 62 ABV values missing, 1005 IBU values amd 5 Style values missing. No other data is missing.
+
 ```{r}
 MissingValues <- sapply(BrewPub,function(MissingValue)sum(is.na(MissingValue)))
 
@@ -74,7 +78,9 @@ as.data.frame(MissingValues) %>%
   kable_styling("striped", full_width = F) 
 
 missmap(BrewPub,y.at=c(1),y.labels = c(''),col=c('yellow','black'))
-  
+
+# Below plot shows more than 40% of IBU and 3% of ABV are missing 
+gg_miss_var(BrewPub, show_pct = TRUE)
 
 ```
 
@@ -103,7 +109,7 @@ Bitter
 ```{r}
 # 4. c Plot a bar chart to compare ABV by state
 
-ggplot(data=Alc, aes(x=State, y=Median_ABV)) +
+ggplot(data=Alc, aes(x=State, y=sort(Median_ABV,decreasing = TRUE))) +
   geom_bar(stat="identity", fill="red")+
   theme_bw() + 
   scale_color_economist()+
@@ -124,8 +130,7 @@ ggplot(data=Bitter, aes(x=State, y=Median_IBU)) +
 
 ```
 
-## 5- Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer? 
-By using which.max function and indexing we found ME has maximum ABV and IBU
+## 5- Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
 
 ``` {r}
 # finding state which has has the maximum alcoholic (ABV) beer
@@ -144,32 +149,33 @@ summary(BrewPub$ABV)
 ``` 
 
 ## 7- Is there an apparent relationship between the bitterness of the beer and its alcoholic content?
-
 ``` {r}
 # drawing a Scatter plot Bitterness of Beer vs Alcholic content
 ggplot(BrewPub, aes(x=BrewPub$IBU, y=BrewPub$ABV)) + geom_point() + geom_smooth(method=lm, se=FALSE) + theme(plot.title = element_text(size=14,hjust= 0.5, face="bold.italic")) + ggtitle("Relationship Between Bitterness of Beer and Its Alcoholic Content") +
   labs(x="Bitterness",y="Alcoholic Content") 
 
 ``` 
-<<<<<<< HEAD
+
 After plotting a scatter plot to depict the relationship between the bitterness of the beer and its alcoholic content, we can see that there is a positive correlation between the bitterness of the beer and its alcoholic content. The higher the alcohol content, the more bitter the beer will taste. With this information an ANOVA for the relationship between IBU and ABV can be conducted. If we can conclude that this model is significant, then a linear regression model can be found with its respective linear regression equation to quanitfy the relationship between IBU and ABV, also enabling the option to predict ABV for IBU that we don't have but would like to explore. 
 
 ### Regression Line for relationship between IBU and ABV
 
 ``` {r}
 # Compute ANOVA for ABV and IBU
-reg1 <- lm(ABV ~ IBU, data = BrewPub)
+reg1 <- lm(ABV ~ IBU , data = BrewPub)
 # Summary of reg 1
 summary(reg1)
 ```
+
 Here we have a p-value of 2e^-16, so at the alpha= 0.05 level we find that there is strong evidence that there is a relationship between IBU and ABV. To quantify this relationship, a linear regression model will be graphed, with its respective equation.
+
 ``` {r}
 # Create a function to pull the data out of a linear regression, return values such as  (R-squares, slope, intercept and P value) at the top of a nice ggplot graph with the regression line.
 Regressionplot <- function (reg) {
  
 require(ggplot2)
 
- ggplot(reg$model, aes_string(x = names(reg$model)[2], y = names(reg$model)[1])) + geom_point() + stat_smooth(method = "lm", col = "red") + labs(title = paste("Adj R2 = ",signif(summary(reg)$adj.r.squared, 5), "Intercept =",signif(reg$coef[[1]],5 ), " Slope =",signif(reg$coef[[2]], 5), " P =",signif(summary(reg)$coef[2,4], 5)))
+ ggplot(reg$model, aes_string(x = names(reg$model)[2], y = names(reg$model)[1])) + geom_point() + stat_smooth(method = "lm", col = "red") + labs(title = paste("R^2 = ",signif(summary(reg)$r.squared, 4), "Intercept =",signif(reg$coef[[1]],5 ), " Slope =",signif(reg$coef[[2]], 5), " P =",signif(summary(reg)$coef[2,4], 5)))
 }
 
 #Final regression plot with R^2 adj, intercept/slope of linear regression line, and p-value
@@ -180,12 +186,8 @@ Regressionplot(reg1)
 After using the visual evidence of the scatter plot of the relationship between IBU and ACV, further analysis was used to look at the IBU and ACV of regions. The states were taken and split into the following regions: South, West, Northeast, and North Central . After each state was separated into their respective regions, Explanatory Data Analysis and ANOVA was used to see if there was any significant results between IBU and ACV of each region.
 
 
-
-
-
 After plotting a scatter plot to depict the relationship between the bitterness of the beer and its alcoholic content, we can see that there is a positive correlation between the bitterness of the beer and its alcoholic content. The higher the alcohol content, the more bitter the beer will taste. 
 
-## EDA##
 
 ``` {r}
 # Creating Region Col
@@ -223,11 +225,13 @@ ggplot(BrewRegion, aes(x=Region, y=ABV)) +
   geom_bar(stat="identity", fill="red")+
   theme_bw() + 
   scale_color_economist()+
-  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) +
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) + ggtitle("ABV by Region") +
+
 
   ggtitle("ABV by Region") +
 
   ggtitle("Barplot of Alcohol Content By Region") +
+
 
   labs(x="Region",y="ABV")
 
@@ -236,13 +240,7 @@ ggplot(BrewRegion, aes(x=Region, y=IBU)) +
   geom_bar(stat="identity", fill="red")+
   theme_bw() + 
   scale_color_economist()+
-  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) +
-
-  ggtitle("IBU by Region") +
-
-  ggtitle("Barplot of Beer Bitterness By Region") +
-
-  labs(x="Region",y="IBU")
+  theme(axis.text.x=element_text(size=rel(0.8), angle=90),plot.title = element_text(size=14,hjust = 0.5, face="bold.italic")) + ggtitle("Barplot of Beer Bitterness By Region") + labs(x="Region",y="IBU")
 
 #  Plot a bar chart to compare Median of ABV by Region
 
@@ -277,15 +275,33 @@ BeerABV.aov <- aov(ABV ~ Region, data = BrewRegion)
 # Summary of the analysis
 summary(BeerABV.aov)
 
-
 # There is strong evidence showing that at confidence level of 0.05 at least the mean of ABV of two region are different (P-Value = 0.02) 
+
+
 
 # Compute the analysis of variance for IBU mean
 BeerIBU.aov <- aov(IBU ~ Region, data = BrewRegion)
 # Summary of the analysis
 summary(BeerIBU.aov)
 
+
 # There is strong evidence showing that at confidence level of 0.05 at least the mean of IBU of two region are different (P-Value = 0.0031) 
 
 ```
 
+
+##Multiple Comparisons By Region: The Bonferroni Procedure
+After performing an ANOVA for IBU and ABV by region and concluding that the betterness and alcohol content differ in beer between regions. To examine which regions differ in regards to IBU and ABV, a multiple comparison procedure is used to find which regions differ. The choice of procedure used for this analysis is the Bonferroni Procedure. 
+
+```{r}
+# Bonferroni Procedure to assess which regions differ in IBU
+print(LSD.test(aov(lm(IBU ~ Region, data=BrewRegion)), "Region", p.adj=c("bonferroni")))
+
+# Bonferroni Procedure to assess which regions differ in ABV
+print(LSD.test(aov(lm(ABV ~ Region, data=BrewRegion)), "Region", p.adj=c("bonferroni")))
+
+# Bonferroni Procedure to assess which regions differ in IBU and ABV
+print(LSD.test(aov(lm(IBU*ABV ~ Region, data=BrewRegion)), "Region", p.adj=c("bonferroni")))
+```
+
+For the Bonferroni Procedure, if the groups have different letters, then those groups are significantly different. In the context of this study, the regions that have different letters are the regions that are significantly different, in other words, the regions with different letters are the regions whose alcoholic content by volume and international bitterness unit differ. For alcoholic content by volume (ABV), ABV is different in the North Central region and Northeast region. For international bitterness unit (IBU), IBU is different in the West region and North Central region. When comparing IBU and ABV in each region, we find that the IBU and ABV in the West and North Central Region differ.
