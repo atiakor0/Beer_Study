@@ -1,10 +1,10 @@
 ---
 title: "Codebook For Case Study 1"
 author: "Allen Ansari,Audrene Tiakor"
-date: "February 17, 2019"
+date: "March 2, 2019"
 output: html_document
 ---
-
+#### github link: https://github.com/allenansari174/Beer_Study
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -301,3 +301,4 @@ summary(BeerIBU.aov)
 
 ## Conclusion
 After using the strategic tools and concepts that will be used in application is tidying the data (merging the two datasets and making the data ready for analysis), finding the number of breweries in each state, computing the median alcohol content (ABV) and international betterness of each state (IBU), finding which state has the the maximum alcohol content and which state has the most bitter beer. The question 'Is there an apparent relationship between the bitterness of the beer and its alcoholic content?', was answered. After plotting the data using a scatterplot there was strong visual evidence of the existence of a relationship between IBU and ACV. Since the answer to the question was a 'yes', further analysis was taken. An Anova was conducted to see if there was a difference in IBU and AVC. The conclusion to that particualar test was that there was a relationship between IBU and ACV. With this conclusion a linear regression model was constructed and an equation for the model was found. After noticing that there was an apparent relationship between IBU and ACV by state, advanced analysis of the data was conducted looking at the IBU and ACV by regions. The regions in which states were categorized are: South, West, Northeast, and North Central. After catergorizing states into regions, histograms, boxplots, and barplots were used to depict the IBV and ABV by regions and the medians of the IBV and ABV were also plotted by histograms, boxplots, and barplots. Final analysis include an Analysis of Variance (ANOVA), to test the claim that ABV and IBU differ by region. To take a further look into which regions differ, the Bonferroni Multiple Comparison Procedure was used. From this procedure, it was found that ABV differs in the North Central and Northeast region. IBU differs in the West and North Central region. When comparing both IBU and ABV by region, we find that they both differ in the West region and the North Central region.  In conclusion, our interesting find from the data after such analyses is that there is an apparent relationshiop between the International Bitterness Unit (IBU) and Alcohol Content by Volume (ABV). In relation to beer and beer sales, one, because of the relationship between IBU and ABV, you can predict the ABV given an IBU. Also, when braking the relationship between IBU and ABV by region or state, we can closely look at the preference of regions to increase sales. We could even investigate ways to give a certain region or population a great beer to give a 'buzz' without a high IBU or craft a great beer with a high IBU without a high ABV. In the long run, this discovery of the relationship between IBU and ABV, can be used in a constructive way for a win-win situation in the future. 
+
